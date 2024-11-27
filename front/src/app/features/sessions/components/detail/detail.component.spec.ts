@@ -56,9 +56,9 @@ describe('DetailComponent', () => {
         HttpClientModule,
         MatSnackBarModule,
         ReactiveFormsModule,
-        MatCardModule, // Ajout du module pour mat-card
-        MatIconModule, // Ajout du module pour mat-icon
-        MatButtonModule, // Ajout pour les boutons
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
       ],
       declarations: [DetailComponent],
       providers: [
@@ -80,30 +80,25 @@ describe('DetailComponent', () => {
   it('should display session information correctly', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    // Vérifier le titre de la session
     const titleElement = compiled.querySelector('h1');
     expect(titleElement?.textContent).toContain('Yoga Session');
 
-    // Vérifier la description
+
     const descriptionElement = compiled.querySelector('.description');
     expect(descriptionElement?.textContent).toContain('A relaxing yoga session.');
 
-    // Vérifier la date de création
     const createdAtElement = compiled.querySelector('.created');
     const normalizedCreatedAt = createdAtElement?.textContent?.replace(/\s+/g, ' ');
     expect(normalizedCreatedAt).toContain('Create at: November 1, 2024');
 
-    // Vérifier la date de dernière mise à jour
     const updatedAtElement = compiled.querySelector('.updated');
     const normalizedUpdatedAt = updatedAtElement?.textContent?.replace(/\s+/g, ' ');
     expect(normalizedUpdatedAt).toContain('Last update: November 15, 2024');
   });
 
-
   it('should display Delete button if user is admin', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    // Vérifier la présence du bouton Delete
     const deleteButton = compiled.querySelector('button[color="warn"]');
     expect(deleteButton).toBeTruthy();
     expect(deleteButton?.textContent).toContain('Delete');
