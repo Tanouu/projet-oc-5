@@ -19,6 +19,8 @@
             </mat-card-content>
             <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Submit</button>
             <p *ngIf="onError" class="error">An error occurred</p>
+          <p *ngIf="onError" class="login-error">Invalid login or password</p>
+          <p *ngIf="form.invalid && form.touched" class="error-message">All fields are required</p>
         </form>
     </mat-card>
 </div>
