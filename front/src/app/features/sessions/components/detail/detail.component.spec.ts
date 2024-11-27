@@ -103,4 +103,13 @@ describe('DetailComponent', () => {
     expect(deleteButton).toBeTruthy();
     expect(deleteButton?.textContent).toContain('Delete');
   });
+
+  it('should call the delete method with the correct session ID', () => {
+    const deleteSpy = jest.spyOn(mockSessionApiService, 'delete').mockReturnValue(of({}));
+
+    component.delete();
+
+    expect(deleteSpy).toHaveBeenCalledWith(component.sessionId);
+  });
+
 });
