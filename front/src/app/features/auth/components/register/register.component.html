@@ -20,6 +20,8 @@
             </mat-card-content>
             <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Submit</button>
             <span *ngIf="onError" class="error ml2">An error occurred</span>
+            <p *ngIf="onError" class="registration-error">Registration failed. Please try again.</p>
+            <p *ngIf="form.invalid && form.touched" class="error-message">All fields are required.</p>
         </form>
     </mat-card>
 </div>
