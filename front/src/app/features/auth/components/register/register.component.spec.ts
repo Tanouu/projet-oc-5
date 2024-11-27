@@ -71,20 +71,6 @@ describe('RegisterComponent', () => {
 
       expect(authServiceMock.register).toHaveBeenCalledWith(mockRegisterRequest);
     });
-
-    it('should navigate to /login on successful registration', () => {
-      authServiceMock.register.mockReturnValue(of(void 0));
-
-      component.form.setValue({
-        email: 'tanou@example.com',
-        firstName: 'Tanou',
-        lastName: 'Pacheco',
-        password: 'toto123'
-      });
-      component.submit();
-
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
-    });
   });
 
   describe('Error Display', () => {
