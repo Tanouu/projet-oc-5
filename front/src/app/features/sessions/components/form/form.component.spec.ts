@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {ActivatedRoute} from "@angular/router";
 
 
 describe('FormComponent', () => {
@@ -123,6 +124,40 @@ describe('FormComponent', () => {
     const submitButton = compiled.querySelector('button[type="submit"]');
     expect(submitButton).toBeTruthy();
     expect(submitButton?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('should update the session successfully using mocks', () => {
+    // Configurer le mock de la méthode update
+    const updateSpy = jest.spyOn(mockSessionApiService, 'update').mockReturnValue(of({
+      id: 1,
+      name: 'Updated Yoga Session',
+      description: 'An updated relaxing yoga session.',
+      date: new Date('2024-12-05'),
+      teacher_id: 102,
+      users: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    // Simuler les valeurs du formulaire
+    component.onUpdate = true; // Simule le mode mise à jour
+    component.sessionForm?.setValue({
+      name: 'Updated Yoga Session',
+      date: '2024-12-05',
+      teacher_id: 102,
+      description: 'An updated relaxing yoga session !',
+    });
+
+    // Appeler la méthode submit
+    component.submit();
+
+    // Vérifier que la méthode update a été appelée avec les bons arguments
+    expect(updateSpy).toHaveBeenCalledWith(undefined, {
+      name: 'Updated Yoga Session',
+      date: '2024-12-05',
+      teacher_id: 102,
+      description: 'An updated relaxing yoga session !',
+    });
   });
 
 });
