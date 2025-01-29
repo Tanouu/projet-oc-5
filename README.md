@@ -22,10 +22,17 @@ Import the SQL script to create the tables and insert initial data:
 ressources/sql/script.sql
 ```
 
+### Install dependencies
+
+```bash
+cd front
+npm install
+```
 
 ### Launch the front-end
 
 ```bash
+cd front
 ng serve
 ```
 
