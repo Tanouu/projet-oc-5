@@ -24,9 +24,13 @@ class UserServiceTest {
     @Autowired
     private UserRepository userRepository;
 
-    @BeforeAll
+    @BeforeEach
+    void cleanDatabase() {
+        userRepository.deleteAll();  // Ensuite supprimer les utilisateurs
+        setUpDatabase();
+    }
+
     void setUpDatabase() {
-        // Initialisation des données avant TOUS les tests
         userRepository.save(new User()
                 .setEmail("ethan@example.com")
                 .setFirstName("Ethan")
@@ -46,44 +50,35 @@ class UserServiceTest {
 
     @Test
     void shouldFindUserById() {
-        // Appeler le service
-        User foundUser = userService.findById(2L);
+        User firstUser = userRepository.findAll().get(0);
+        User foundUser = userService.findById(firstUser.getId());
 
-        // Vérifier les résultats
         assertThat(foundUser).isNotNull();
         assertThat(foundUser.getEmail()).isEqualTo("ethan@example.com");
     }
 
     @Test
     void shouldReturnNullWhenUserNotFound() {
-        // Appeler le service avec un ID inexistant
         User foundUser = userService.findById(999L);
-
-        // Vérifier le résultat
         assertThat(foundUser).isNull();
     }
 
     @Test
     void shouldDeleteUserById() {
-        // Supprimer un utilisateur
-        userService.delete(1L);
+        User firstUser = userRepository.findAll().get(0);
+        userService.delete(firstUser.getId());
 
-        // Vérifier qu'il est supprimé
-        assertThat(userRepository.findById(1L)).isEmpty();
+        assertThat(userRepository.findById(firstUser.getId())).isEmpty();
     }
 
     @Test
     void shouldReturnAllUsers() {
-        // Appeler le service pour récupérer tous les utilisateurs
         List<User> users = userRepository.findAll();
-
-        // Vérifier qu'il y a 3 utilisateurs initiaux
-        assertThat(users).hasSize(3);
+        assertThat(users).hasSize(2);
     }
 
     @Test
     void shouldFailToSaveUserWithInvalidEmail() {
-        // Essayer de sauvegarder un utilisateur avec un email invalide
         User invalidUser = new User()
                 .setEmail("invalid-email")
                 .setFirstName("Invalid")
@@ -95,17 +90,14 @@ class UserServiceTest {
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
-
     @Test
     void shouldUpdateUserDetails() {
-        // Mettre à jour un utilisateur existant
-        User existingUser = userService.findById(2L);
+        User existingUser = userRepository.findAll().get(0);
         existingUser.setFirstName("UpdatedFirstName");
 
         userRepository.save(existingUser);
 
-        // Vérifier les changements
-        User updatedUser = userService.findById(2L);
+        User updatedUser = userService.findById(existingUser.getId());
         assertThat(updatedUser.getFirstName()).isEqualTo("UpdatedFirstName");
     }
 }

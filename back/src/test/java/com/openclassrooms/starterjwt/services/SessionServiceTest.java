@@ -39,6 +39,7 @@ class SessionServiceTest {
     void setUp() {
         sessionRepository.deleteAll();
         userRepository.deleteAll();
+        teacherRepository.deleteAll();
 
         userRepository.save(new User()
                 .setEmail("ethan@example.com")
@@ -54,6 +55,16 @@ class SessionServiceTest {
                 .setLastName("Pacheco")
                 .setPassword("password123")
                 .setAdmin(false)
+        );
+
+        teacherRepository.save(new Teacher()
+                .setFirstName("Margot")
+                .setLastName("DELAHAYE")
+        );
+
+        teacherRepository.save(new Teacher()
+                .setFirstName("Hélène")
+                .setLastName("THIERCELIN")
         );
     }
 
