@@ -48,6 +48,7 @@ class UserServiceTest {
         );
     }
 
+
     @Test
     void shouldFindUserById() {
         User firstUser = userRepository.findAll().get(0);
