@@ -10,4 +10,9 @@ public class SpringBootSecurityJwtApplicationTests {
 	public void contextLoads() {
 	}
 
+	@Test
+	void mainMethodShouldRunWithoutExceptions() {
+		SpringBootSecurityJwtApplication.main(new String[]{});
+	}
+
 }

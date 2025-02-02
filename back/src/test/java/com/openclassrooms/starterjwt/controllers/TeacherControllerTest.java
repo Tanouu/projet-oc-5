@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -28,10 +29,27 @@ class TeacherControllerTest {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    @BeforeEach
+    void setUp() {
+        teacherRepository.deleteAll();
+
+        teacherRepository.save(new Teacher().setFirstName("Margot").setLastName("DELAHAYE"));
+        teacherRepository.save(new Teacher().setFirstName("Hélène").setLastName("THIERCELIN"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
+    void shouldReturnAllTeachers() throws Exception {
+        mockMvc.perform(get("/api/teacher"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].firstName").value("Margot"))
+                .andExpect(jsonPath("$[1].firstName").value("Hélène"));
+    }
+
     @Test
     @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
     void shouldReturnTeacherWhenFoundById() throws Exception {
-        // Récupérer un enseignant existant dans la base
         Teacher teacher = teacherRepository.findAll().get(0);
 
         mockMvc.perform(get("/api/teacher/" + teacher.getId()))
@@ -49,11 +67,8 @@ class TeacherControllerTest {
 
     @Test
     @WithMockUser(username = "admin@example.com", roles = {"ADMIN"})
-    void shouldReturnAllTeachers() throws Exception {
-        mockMvc.perform(get("/api/teacher"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].firstName").value("Margot"))
-                .andExpect(jsonPath("$[1].firstName").value("Hélène"));
+    void shouldReturnBadRequestForInvalidId() throws Exception {
+        mockMvc.perform(get("/api/teacher/invalid-id"))
+                .andExpect(status().isBadRequest());
     }
 }

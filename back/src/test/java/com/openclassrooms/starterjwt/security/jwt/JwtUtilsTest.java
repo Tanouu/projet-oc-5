@@ -7,10 +7,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.openclassrooms.starterjwt.security.services.UserDetailsImpl;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Jwts;
 
 import java.util.Date;
 
@@ -18,16 +21,17 @@ class JwtUtilsTest {
 
     private JwtUtils jwtUtils;
 
-    private final String jwtSecret = "testSecret"; // Simuler la valeur de ${oc.app.jwtSecret}
-    private final int jwtExpirationMs = 3600000; // Simuler la valeur de ${oc.app.jwtExpirationMs}
+    // Valeurs de test
+    private final String jwtSecret = "testSecret"; // Secret de test
+    private final int jwtExpirationMs = 3600000;  // 1 heure
 
     @BeforeEach
     void setUp() {
         jwtUtils = new JwtUtils();
 
-        // Injecter les valeurs des propriétés via réflexion
-        injectPrivateField(jwtUtils, "jwtSecret", jwtSecret);
-        injectPrivateField(jwtUtils, "jwtExpirationMs", jwtExpirationMs);
+        // Injection correcte des champs privés
+        ReflectionTestUtils.setField(jwtUtils, "jwtSecret", jwtSecret);
+        ReflectionTestUtils.setField(jwtUtils, "jwtExpirationMs", jwtExpirationMs);
     }
 
     @Test
@@ -56,32 +60,33 @@ class JwtUtilsTest {
     @Test
     void shouldReturnFalseForExpiredJwtToken() {
         // Générer un token expiré
-        String expiredToken = io.jsonwebtoken.Jwts.builder()
+        String expiredToken = Jwts.builder()
                 .setSubject("test@example.com")
                 .setIssuedAt(new Date(System.currentTimeMillis() - 7200000)) // Expiré depuis 2 heures
                 .setExpiration(new Date(System.currentTimeMillis() - 3600000)) // Expiré depuis 1 heure
-                .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
 
         assertThat(jwtUtils.validateJwtToken(expiredToken)).isFalse();
     }
 
+
     @Test
     void shouldThrowExceptionForMalformedJwtToken() {
         String malformedToken = "malformed.token";
 
-        // Valider le token et vérifier les logs
+        // Vérifie que le token mal formé est bien invalide
         assertThat(jwtUtils.validateJwtToken(malformedToken)).isFalse();
     }
 
     @Test
     void shouldGetUserNameFromJwtToken() {
         // Générer un token
-        String token = io.jsonwebtoken.Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject("test@example.com")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
 
         // Extraire le nom d'utilisateur
@@ -90,14 +95,42 @@ class JwtUtilsTest {
         assertThat(username).isEqualTo("test@example.com");
     }
 
-    // Méthode utilitaire pour injecter les champs privés
-    private void injectPrivateField(Object target, String fieldName, Object value) {
-        try {
-            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'injection de champ privé", e);
-        }
+
+    @Test
+    void shouldReturnFalseForJwtWithMalformedStructure() {
+        String malformedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.malformedPayload.signature";
+
+        assertThat(jwtUtils.validateJwtToken(malformedToken)).isFalse();
     }
+
+    @Test
+    void shouldReturnFalseForJwtWithoutSignature() {
+        String unsignedToken = io.jsonwebtoken.Jwts.builder()
+                .setSubject("test@example.com")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .compact();
+
+        assertThat(jwtUtils.validateJwtToken(unsignedToken)).isFalse();
+    }
+
+    @Test
+    void shouldValidateJwtWithoutExpiration() {
+        String tokenWithoutExp = Jwts.builder()
+                .setSubject("test@example.com")
+                .setIssuedAt(new Date())
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+
+        assertThat(jwtUtils.validateJwtToken(tokenWithoutExp)).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseForCompletelyInvalidJwt() {
+        String invalidToken = "not.a.jwt.token";
+
+        assertThat(jwtUtils.validateJwtToken(invalidToken)).isFalse();
+    }
+
+
 }

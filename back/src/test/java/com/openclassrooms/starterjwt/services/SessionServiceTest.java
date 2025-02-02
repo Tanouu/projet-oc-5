@@ -169,4 +169,37 @@ class SessionServiceTest {
         Session updatedSession = sessionService.getById(session.getId());
         assertThat(updatedSession.getUsers()).isEmpty();
     }
+
+    @Test
+    void shouldRemoveParticipationFromSessionCompletely() {
+        Teacher teacher = teacherRepository.findAll().get(0);
+        Session session = sessionService.create(new Session()
+                .setName("Yoga Class")
+                .setDate(new Date())
+                .setDescription("A beginner yoga session")
+                .setTeacher(teacher)
+        );
+
+        User user1 = userRepository.findAll().get(0);
+        User user2 = userRepository.findAll().get(1);
+
+        sessionService.participate(session.getId(), user1.getId());
+        sessionService.participate(session.getId(), user2.getId());
+
+        Session sessionBefore = sessionService.getById(session.getId());
+        assertThat(sessionBefore.getUsers()).hasSize(2);
+
+        sessionService.noLongerParticipate(session.getId(), user1.getId());
+
+        Session sessionAfter = sessionService.getById(session.getId());
+        assertThat(sessionAfter.getUsers()).hasSize(1);
+        assertThat(sessionAfter.getUsers()).doesNotContain(user1);
+
+        sessionService.noLongerParticipate(session.getId(), user2.getId());
+
+        Session finalSession = sessionService.getById(session.getId());
+        assertThat(finalSession.getUsers()).isEmpty();
+    }
+
+
 }
