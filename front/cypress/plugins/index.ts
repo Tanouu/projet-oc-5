@@ -1,8 +1,11 @@
-/**
- * @type {Cypress.PluginConfig}
- */
- import * as registerCodeCoverageTasks from '@cypress/code-coverage/task';
+import { defineConfig } from 'cypress'
 
- export default (on, config) => {
-   return registerCodeCoverageTasks(on, config);
- };
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      console.log('✅ Cypress Code Coverage Plugin Loaded');
+      require('@cypress/code-coverage/task')(on, config);
+      return config;
+    },
+  },
+});

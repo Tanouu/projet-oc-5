@@ -1,5 +1,7 @@
 import * as path from 'path';
 
+console.log('✅ Webpack coverage configuration is being applied');
+
 export default {
   module: {
     rules: [

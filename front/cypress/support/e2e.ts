@@ -17,3 +17,12 @@
 // import './commands';
 
 import '@cypress/code-coverage/support';
+
+declare global {
+  interface Window {
+    __coverage__: any;
+  }
+}
+
+export {};
+
